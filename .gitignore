@@ -1,0 +1,6 @@
+.env
+node_modules
+images
+db-info.js
+log.txt
+to-do.txt
