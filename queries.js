@@ -143,7 +143,7 @@ const createAuction = (req, res) => {
       return;
     }
     const start_date = (new Date()); 
-    const end_date = addMinutes(start_date, endTime)
+    const end_date = addDays(start_date, endTime)
     const diff = differenceInMilliseconds(end_date, start_date);
     let image_path = null
     if(Object.prototype.hasOwnProperty.call(req, 'file.path')) {
