@@ -4,3 +4,6 @@ images
 db-info.js
 log.txt
 to-do.txt
+.DS_Store
+auction_api/
+t.js
