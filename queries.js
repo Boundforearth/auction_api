@@ -123,31 +123,6 @@ const createAuction = (req, res) => {
   }
 };
 
-/**
- * @method GET
- * @param {string} 
- * Used to add a category to the DB.  Just for bckend stuff
- */
-const createCategory = (req, res) => {
-  const category = req.body.category;
-  db.pool.query('SELECT category FROM Categories WHERE category=$1', [category], (error, results) => {
-    if (error) {
-      res.status(400).send('Error with the database');
-      return;
-    }
-    if (typeof (results.rows[0]) !== 'undefined') {
-      res.status(400).send('That category is already in the DB');
-    } else {
-      db.pool.query('INSERT INTO Categories (category) VALUES ($1)', [category], (error, results) => {
-        if (error) {
-          res.status(400).send('Error with the database');
-          return;
-        }
-        res.status(200).send(`Inserted ${category}`);
-      })
-    }
-  })
-}
 
 /***
  * Function used to calculate the increment with which the bid price should increase
@@ -354,20 +329,6 @@ const getAuctionBidHistory = (req, res) => {
   })
 }
 
-/**
- * @method GET
- */
-const getCategories = (req, res) => {
-  db.pool.query('SELECT * FROM Categories', (error, results) => {
-    if (error) {
-      return res.status(400).send('Error retrieveing categories from the database');
-    } else if (typeof (results.rows[0]) !== 'undefined') {
-      return res.status(200).json(results.rows)
-    } else {
-      return res.status(404).send('categoreis not found')
-    }
-  })
-}
 
 /**
  * @method GET
@@ -507,17 +468,13 @@ const resetTimeoutFunctions = () => {
 module.exports = {
   createAuction,
   createCategory,
-  createUser,
   deleteUser,
   getAuction,
   getAuctionBidHistory,
   getCategories,
   getBidHistory,
-  getUserById,
   placeBid,
   searchAuctions,
   resetTimeoutFunctions,
-  updateUsername,
-  updatePassword,
   verifyUser
 }
