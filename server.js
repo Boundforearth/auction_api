@@ -9,7 +9,16 @@ const auth = require('./auth');
 const multer = require("multer");
 const cors = require('cors');
 const v = require('./validation');
-const feedback = require('./feedback');
+const feedback = require('./controllers/feedbackController');
+const users = require('./controllers/userController')
+
+
+////Import Routers////
+const userRouter = require('./routers/userRouter');
+const auctionRouter = require('./routers/auctionRouter');
+const feedbackRouter = require('./routers/feedbackRouter');
+const categoryRouter = require('./routers/categoryRouter');
+const bidRouter = require('./routers/bidRouter');
 
 require('./passport');
 require('dotenv').config();
@@ -25,19 +34,19 @@ const storage = multer.diskStorage({
   }
 })
 
-const upload = multer({storage: storage})
+const upload = multer({ storage: storage })
 
 
 const app = express();
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-const accessLogStream = fs.createWriteStream(path.join(__dirname,'log.txt'), {flags: 'a'});
-app.use(morgan('combined', {stream: accessLogStream}));
+app.use(bodyParser.urlencoded({ extended: true }));
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }));
 let allowedOrigins = ["http://localhost:8080"];
 app.use(cors({
   origin: (origin, callback) => {
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
       let message = `The CORS policy for this application doesn't allow access from origin ` + origin;
       return callback(new Error(message), false);
     }
@@ -57,7 +66,7 @@ app.get('/', (req, res) => {
  * Gets a user's user_id, username, and email given a specific user_id
  */
 app.get(
-  '/users/:user_id', 
+  '/users/:user_id',
   queries.getUserById);
 
 /**
@@ -66,8 +75,8 @@ app.get(
  * Gets a user's Bid history based on the user_id
  */
 app.get(
-  '/bids/:user_id', 
-  passport.authenticate('jwt', {session: false}),  
+  '/bids/:user_id',
+  passport.authenticate('jwt', { session: false }),
   queries.getBidHistory);
 
 /**
@@ -88,9 +97,9 @@ app.get(
   '/auctions/:auction_id/',
   queries.getAuction);
 
-  /**
-   * @method GET
-   */
+/**
+ * @method GET
+ */
 app.get(
   '/categories',
   queries.getCategories
@@ -105,7 +114,7 @@ app.get(
  * Maybe add option to search for all auctions?
  */
 app.get(
-  '/auctions/search/:keyword/:category_id', 
+  '/auctions/search/:keyword/:category_id',
   queries.searchAuctions);
 
 /**
@@ -114,7 +123,7 @@ app.get(
  * Gets a user's feedback based on the user_id
  */
 app.get(
-  '/feedback/:user_id', 
+  '/feedback/:user_id',
   feedback.getFeedback);
 
 /**
@@ -125,9 +134,9 @@ app.get(
  * Returns a JWT token to the user to be stored locally by the user
  */
 app.post(
-  '/login', 
-  v.validate('login'), 
-  passport.authenticate('local', {session: false}), 
+  '/login',
+  v.validate('login'),
+  passport.authenticate('local', { session: false }),
   auth.userLogin);
 
 /**
@@ -137,8 +146,8 @@ app.post(
  * @body {string} email
  */
 app.post(
-  '/users', 
-  v.validate('createUser'), 
+  '/users',
+  v.validate('createUser'),
   queries.createUser);
 
 /**
@@ -148,25 +157,25 @@ app.post(
  * Not to be implemented client side
  */
 app.post(
-  '/categories', 
+  '/categories',
   queries.createCategory);
 
-  /**
-   * @method POST
-   * @body {integer} user_id
-   * @body {string} title
-   * @body {integer} category_id
-   * @body {string} description
-   * @body {integer} endTime
-   * @body {float} start_price
-   * @body {file} image file (Upload a file.  The image path will be created by multer and stored)
-   * Creates an auction.  Initializes with no highest bidder, no end price, and 0 initial bids
-   */
+/**
+ * @method POST
+ * @body {integer} user_id
+ * @body {string} title
+ * @body {integer} category_id
+ * @body {string} description
+ * @body {integer} endTime
+ * @body {float} start_price
+ * @body {file} image file (Upload a file.  The image path will be created by multer and stored)
+ * Creates an auction.  Initializes with no highest bidder, no end price, and 0 initial bids
+ */
 app.post(
-  '/auctions', 
+  '/auctions',
   v.validate('createAuction'),
-  passport.authenticate('jwt', {session: false}),  
-  upload.single('image'), 
+  passport.authenticate('jwt', { session: false }),
+  upload.single('image'),
   queries.createAuction);
 
 /** 
@@ -179,64 +188,74 @@ app.post(
  * Allows a user to leave feedback on someone else's account if.
  */
 app.post(
-  '/feedback', 
+  '/feedback',
   v.validate('postFeedback'),
-  passport.authenticate('jwt', {session: false}),
+  passport.authenticate('jwt', { session: false }),
   feedback.leaveFeedback);
 
-  /**
-   * @method PUT
-   * @param {integer} auction_id
-   * @body {integer} user_id
-   * @body {float} bid
-   * Allows a user to place a bid on an aucion
-   */
-app.put(
-  '/auctions/:auction_id', 
+/**
+ * @method PUT
+ * @param {integer} auction_id
+ * @body {integer} user_id
+ * @body {float} bid
+ * Allows a user to place a bid on an aucion
+ */
+app.patch(
+  '/auctions/:auction_id',
   v.validate('placeBid'),
-  passport.authenticate('jwt', {session: false}), 
+  passport.authenticate('jwt', { session: false }),
   queries.placeBid);
 
-  /**
-   * @method PUT
-   * @param {integer} user_id
-   * @body {string} password
-   * @body {string} newPassword
-   */
-app.put(
-  '/users/username/:user_id', 
+/**
+ * @method PUT
+ * @param {integer} user_id
+ * @body {string} password
+ * @body {string} newPassword
+ */
+app.patch(
+  '/users//:user_id',
   v.validate('updateUsername'),
-  passport.authenticate('jwt', {session: false}), 
+  passport.authenticate('jwt', { session: false }),
   queries.updateUsername);
 
-    /**
-   * @method PUT
-   * @param {integer} user_id
-   * @body {string} password
-   * @body {string} username
-   * @body {string} newUsername
-   */
-app.put(
-  '/users/password/:user_id', 
+/**
+* @method PUT
+* @param {integer} user_id
+* @body {string} password
+* @body {string} username
+* @body {string} newUsername
+*/
+app.patch(
+  '/users/password/:user_id',
   v.validate('updatePassword'),
-  passport.authenticate('jwt', {session: false}), 
+  passport.authenticate('jwt', { session: false }),
   queries.updatePassword);
 
 
-  /**
-   * @method DELETE
-   * @param {integer} user_id
-   * @body {string} password
-   */
+/**
+ * @method DELETE
+ * @param {integer} user_id
+ * @body {string} password
+ */
 app.delete(
   '/users/:user_id',
   v.validate('deleteUser'),
-  passport.authenticate('jwt', {session: false}), 
+  passport.authenticate('jwt', { session: false }),
   queries.deleteUser);
 
 
 
-app.use((err,req,res,next) => {
+
+app.use('/api/v1/users/', userRouter)
+app.use('/api/v1/auctions', auctionRouter)
+app.use('/api/v1/feedback', feedbackRouter)
+app.use('/api/v1/categories', categoryRouter)
+app.use('/api/v1/bids', bidRouter)
+
+
+
+
+app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
