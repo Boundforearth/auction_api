@@ -2,7 +2,7 @@ const db = require('./db-info');
 const { validationResult } = require('express-validator');
 const { differenceInMilliseconds, addDays, addMinutes } = require('date-fns')
 const helpers = require('../queries')
-require('./passport');
+require('../passport');
 
 
 /**
