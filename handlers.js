@@ -19,27 +19,6 @@ const handleLiveAuctions = async (id, price) => {
   }
 }
 
-/**
- * Function used to grab the JWT token, pull out the payload, and then grab the user_id from the payload.
- * After grabbing the user_id, it will check that against the user_id submitted in a form.
- * If the two match, then the user is verified and the action they were attempting will proceed. 
- * @param {string} token 
- * @return {boolean} 
- * Returns true if the user has access, false if something fishy is going on.
- */
-
-const verifyUser = (req, user) => {
-  token = req
-  parsed = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-  id = parsed.user_id;
-  if (id == user) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 
 
 const resetTimeoutFunctions = async () => {
@@ -67,6 +46,5 @@ const resetTimeoutFunctions = async () => {
 
 module.exports = {
   resetTimeoutFunctions,
-  handleLiveAuctions,
-  verifyUser
+  handleLiveAuctions
 }

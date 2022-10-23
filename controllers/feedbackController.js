@@ -1,6 +1,6 @@
 const db = require('../db-info');
 const { validationResult } = require('express-validator');
-const u = require('../queries');
+const auth = require('../auth');
 
 //function to handle leaving feedback from the buyer
 const handleFeedback = async (req, res, user_id, feedback_poster_id, auction_id, feedback_score, feedback, role) => {
@@ -57,7 +57,7 @@ const leaveFeedback = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ status: 'fail', errors: errors.array() });
     }
-    let check = u.verifyUser(req.headers.authorization, feedback_poster_id)
+    let check = auth.verifyUser(req.headers.authorization, feedback_poster_id)
     if (!check) {
       return res.status(400).send('Users may only perform this action with their own account.');
     } else if (feedback_score !== -1 && feedback_score !== 0 && feedback_score !== 1) {

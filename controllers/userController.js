@@ -2,7 +2,7 @@ const db = require('../db-info');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 require('../passport');
-const u = require('../queries');
+const auth = require('../auth');
 
 /***
  * @method GET
@@ -73,7 +73,7 @@ const updateUser = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  let check = u.verifyUser(req.headers.authorization, user_id)
+  let check = auth.verifyUser(req.headers.authorization, user_id)
   if (!check) {
     return res.status(400).send('Users may only perform this action with their own account.');
   }
@@ -114,7 +114,7 @@ const deleteUser = async (req, res) => {
 
   //code to check validation results
   const errors = validationResult(req);
-  let check = u.verifyUser(req.headers.authorization, user_id)
+  let check = auth.verifyUser(req.headers.authorization, user_id)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   } else if (!check) {

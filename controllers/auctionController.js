@@ -1,7 +1,7 @@
 const db = require('./db-info');
 const { validationResult } = require('express-validator');
 const { differenceInMilliseconds, addDays, addMinutes } = require('date-fns')
-const helpers = require('../queries')
+const auth = require('../auth')
 require('../passport');
 
 
@@ -21,7 +21,7 @@ const createAuction = async (req, res) => {
   const tempPrice = req.body.start_price
   const start_price = Number(tempPrice).toFixed(2);
 
-  let check = helpers.verifyUser(req.headers.authorization, user_id)
+  let check = auth.verifyUser(req.headers.authorization, user_id)
   if (!check) {
     res.status(400).send('Users may only perform this action with their own account.');
     return;
@@ -99,7 +99,7 @@ const placeBid = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  let check = helpers.verifyUser(req.headers.authorization, user_id)
+  let check = auth.verifyUser(req.headers.authorization, user_id)
   if (!check) {
     return res.status(400).send('Users may only perform this action with their own account.');
   }
