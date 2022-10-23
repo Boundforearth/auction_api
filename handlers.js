@@ -24,7 +24,7 @@ const handleLiveAuctions = async (id, price) => {
 const resetTimeoutFunctions = async () => {
   const currentTime = new Date();
   try {
-    const results = db.pool.query('SELECT * FROM LiveAuctions')
+    const results = await db.pool.query('SELECT * FROM LiveAuctions')
     if (results.rows[0]) {
       results.rows.forEach((row) => {
         const auction_id = row.auction_id;
