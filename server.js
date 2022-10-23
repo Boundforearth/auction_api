@@ -4,13 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const queries = require('./queries');
-const passport = require('passport');
-const auth = require('./auth');
-const multer = require("multer");
 const cors = require('cors');
-const v = require('./validation');
-const feedback = require('./controllers/feedbackController');
-const users = require('./controllers/userController')
+
 
 
 ////Import Routers////
@@ -23,25 +18,15 @@ const bidRouter = require('./routers/bidRouter');
 require('./passport');
 require('dotenv').config();
 
-//Use this to set up image storage in the file system.
-//Not using cloud storage because this project is somewhat small
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, 'images')
-  },
-  filename: (req, file, callback) => {
-    callback(null, Date.now() + path.extname(file.originalname))
-  }
-})
-
-const upload = multer({ storage: storage })
-
-
 const app = express();
+
+// BodyParser and Logs middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
+
+//Cors and allowed origins
 let allowedOrigins = ["http://localhost:8080"];
 app.use(cors({
   origin: (origin, callback) => {
