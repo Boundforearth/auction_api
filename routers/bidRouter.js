@@ -4,5 +4,5 @@ const passport = require('passport')
 
 const router = express.Router()
 
-router('/:user_id')
+router.route('/:user_id')
   .get(passport.authenticate('jwt', { session: false }), bidController.getBidHistory)

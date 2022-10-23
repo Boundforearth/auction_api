@@ -3,7 +3,7 @@ const morgan = require('morgan')
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-const queries = require('./queries');
+const handler = require('./handlers');
 const cors = require('cors');
 
 
@@ -63,6 +63,6 @@ app.use((err, req, res, next) => {
 const port = process.env.PORT || 8080
 
 module.exports = app.listen(port, () => {
-  queries.resetTimeoutFunctions();
+  handler.resetTimeoutFunctions();
   console.log('Your app is listening on port 8080');
 });

@@ -1,4 +1,4 @@
-const db = require('./db-info');
+const db = require('../db-info');
 const { validationResult } = require('express-validator');
 const { differenceInMilliseconds, addDays, addMinutes } = require('date-fns')
 const auth = require('../auth')
