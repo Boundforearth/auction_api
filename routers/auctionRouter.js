@@ -1,5 +1,6 @@
 const express = require('express');
 const auctionController = require('../controllers/auctionController');
+const path = require('path');
 const passport = require('passport');
 const v = require('../validation');
 const multer = require('multer');
@@ -9,7 +10,7 @@ const multer = require('multer');
 //Not using cloud storage because this project is somewhat small
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    callback(null, '../images')
+    callback(null, `${__dirname}/../images`)
   },
   filename: (req, file, callback) => {
     callback(null, Date.now() + path.extname(file.originalname))

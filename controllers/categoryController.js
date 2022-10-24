@@ -9,7 +9,7 @@ const getCategories = async (req, res) => {
     if (!results.rows[0]) {
       return res.status(404).json({ status: 'fail', message: 'categoreis not found' })
     }
-    return res.status(200).json(results.rows)
+    return res.status(200).json({ status: 'success', data: results.rows })
 
   }
   catch (err) {

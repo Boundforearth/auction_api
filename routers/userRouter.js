@@ -7,7 +7,7 @@ const v = require('../validation');
 router.route('/')
   .post(v.validate('createUser'), userController.createUser)
 
-router.route('/:id')
+router.route('/:user_id')
   .get(userController.getUserById)
   ////Need to fix validation
   .patch(v.validate('updateUsername'), passport.authenticate('jwt', { session: false }), userController.updateUser)

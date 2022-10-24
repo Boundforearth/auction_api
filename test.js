@@ -127,7 +127,7 @@ describe('Auction API Tests', () => {
   /**
    * Test category creation
    */
-  describe('POST /categories', () => {
+  describe('POST /api/v1/categories', () => {
     const category = {
       'category': 'video games'
     }
@@ -162,210 +162,219 @@ describe('Auction API Tests', () => {
   /**
    * Test category list retrieval
    */
-  //   describe('GET /categories', () => {
-  //     it('Should get a list of all categories', (done) => {
-  //       chai.request(server)
-  //       .get('/categories')
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.body.should.be.a('array')
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('category_id');
-  //           object.should.have.property('category');
-  //         }
-  //           )
-  //       done();
-  //       });
-  //     }); 
-  //   });
+  describe('GET /api/v1/categories', () => {
+    it('Should get a list of all categories', (done) => {
+      chai.request(server)
+        .get('/api/v1/categories')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success');
+          response.body.data.forEach((object) => {
+            object.should.have.property('category_id');
+            object.should.have.property('category');
+          }
+          )
+          done();
+        });
+    });
+  });
 
-  //   /**
-  //    * Test getting a users information by id
-  //    */
-  //   describe('GET /users/:user_id', () => {
-  //     it('It should GET a single user by their user_id', (done) => {
-  //       const user_id = 1;
-  //       chai.request(server)
-  //         .get('/users/' + user_id)
-  //         .end( function(error, response) {
-  //           response.should.have.status(200);
-  //           response.body.should.be.a('object');
-  //           response.body.should.have.property('username');
-  //           response.body.should.have.property('user_id').eq(1);
-  //           response.body.should.have.property('feedback_score');
-  //         done();
-  //         });
-  //     });
+  /**
+   * Test getting a users information by id
+   */
+  describe('GET /users/:user_id', () => {
+    it('It should GET a single user by their user_id', (done) => {
+      const user_id = 1;
+      chai.request(server)
+        .get('/api/v1/users/' + user_id)
+        .end(function (error, response) {
+          response.body.should.be.a('object');
+          response.body.data.user.should.have.property('username');
+          response.body.data.user.should.have.property('user_id').eq(1);
+          response.body.data.user.should.have.property('feedback_score');
+          response.should.have.status(200);
+          done();
+        });
+    });
 
-  //     it('It should NOT GET a user', (done) => {
-  //       const user_id = 50;
-  //       chai.request(server)
-  //       .get('/users/' + user_id)
-  //       .end( function(error, response) {
-  //         response.should.be.status(404);
-  //         response.text.should.be.eq('That user could not be found.')
-  //         done()
-  //       });
-  //     });
-  //   });
+    it('It should NOT GET a user', (done) => {
+      const user_id = 50;
+      chai.request(server)
+        .get('/api/v1/users/' + user_id)
+        .end(function (error, response) {
+          response.should.be.status(404);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq('User not found.')
+          done()
+        });
+    });
+  });
 
-  //   /**
-  //    * Test creating an auction
-  //    */
-  //   describe('POST /auctions', () => {
+  /**
+   * Test creating an auction
+   */
+  describe('POST /api/v1/auctions', () => {
 
-  //     it("Should fail to post auction without authorization", (done) => {
-  //       const auction = {
-  //           "user_id": 1,
-  //           "title": "My auction BID HERE!",
-  //           "category_id": 1, 
-  //           "description": "A cool thing", 
-  //           "endTime": 1, 
-  //           "start_price": 1.00
-  //       }
-  //       chai.request(server)
-  //       .post('/auctions')
-  //       .send(auction)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq(`Unauthorized`)
-  //       done();
-  //       });
-  //     });
+    it("Should fail to post auction without authorization", (done) => {
+      const auction = {
+        "user_id": 1,
+        "title": "My auction BID HERE!",
+        "category_id": 1,
+        "description": "A cool thing",
+        "endTime": 1,
+        "start_price": 1.00
+      }
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .send(auction)
+        .end((error, response) => {
+          response.text.should.be.eq(`Unauthorized`)
+          done();
+        });
+    });
 
-  //     it("should correctly create an auction", (done) => {
-  //       const auction = {
-  //           "user_id": 1,
-  //           "title": "My auction BID HERE!",
-  //           "category_id": 1, 
-  //           "description": "A cool thing", 
-  //           "endTime": 1, 
-  //           "start_price": 1.00
-  //       }
-  //       chai.request(server)
-  //       .post('/auctions')
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(auction)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq(`You have created an auction with id 1`)
-  //         response.should.have.status(200);
-  //       done();
-  //       });
-  //     });
+    it("should correctly create an auction", (done) => {
+      const auction = {
+        "user_id": 1,
+        "title": "My auction BID HERE!",
+        "category_id": 1,
+        "description": "A cool thing",
+        "endTime": 1,
+        "start_price": 1.00
+      }
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(auction)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success');
+          response.body.should.have.property('message').eq(`You have created an auction with id 1`)
+          response.should.have.status(200);
+          done();
+        });
+    });
 
-  //       /**
-  //    * Test auction creation w/ image file
-  //    * NOTE, CHAI AUTO CONVERTS NUMBERS TO STRINGS IN .field().  As far as I can tell, anyway
-  //    * this kills the test, as none of the numbers will pass vlidation and the user gets blocked
-  //    * this is a problem with chai.  As observed in the above test, it passes fine without fields
-  //    * sent can not be used with attach, however, so fields become necessary.
-  //    * Not getting a multer error implies success here
-  //    */
-  //     it("Should get past multer upload, but trigger incorrect user warning", (done) => {
-  //       chai.request(server)
-  //       .post('/auctions')
-  //       .attach('image', './images/1663039586518.png')
-  //       .field("user_id", 1)
-  //       .field("category_id", 1)
-  //       .field("description", "A cool thing")
-  //       .field("start_price", 1.00)
-  //       .field("title", "My auction BID HERE!")
-  //       .field("endTime", 7)
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .end((error, response) => {
-  //         response.body.should.be.a('object')
-  //         response.body.errors.forEach((object) => {
-  //           object.should.have.property('param')
-  //         })
-  //       done();
-  //       });
-  //     });
+    /**
+ * Test auction creation w/ image file
+ * NOTE, CHAI AUTO CONVERTS NUMBERS TO STRINGS IN .field().  As far as I can tell, anyway
+ * this kills the test, as none of the numbers will pass vlidation and the user gets blocked
+ * this is a problem with chai.  As observed in the above test, it passes fine without fields
+ * sent can not be used with attach, however, so fields become necessary.
+ * Not getting a multer error implies success here
+ */
+    it("Should get past multer upload, but trigger incorrect user warning", (done) => {
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .attach('image', './images/1663039586518.png')
+        .field("user_id", 1)
+        .field("category_id", 1)
+        .field("description", "A cool thing")
+        .field("start_price", 1.00)
+        .field("title", "My auction BID HERE!")
+        .field("endTime", 7)
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .end((error, response) => {
+          response.body.should.be.a('object')
+          response.body.errors.forEach((object) => {
+            object.should.have.property('param')
+          })
+          done();
+        });
+    });
 
-  //     it("Should fail to insert bad parameters title", (done) => {
-  //       const auction = {
-  //           "user_id": 1,
-  //           "title": '',
-  //           "category_id": 1, 
-  //           "description": "A cool thing", 
-  //           "endTime": 5, 
-  //           "start_price": 1.00
-  //       }
-  //       chai.request(server)
-  //       .post('/auctions')
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(auction)
-  //       .end((error, response) => {
-  //         response.body.should.be.a('object');
-  //         response.body.errors[0].should.have.property('param').eq('title')
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     });
+    it("Should fail to insert bad parameters title", (done) => {
+      const auction = {
+        "user_id": 1,
+        "title": '',
+        "category_id": 1,
+        "description": "A cool thing",
+        "endTime": 5,
+        "start_price": 1.00
+      }
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(auction)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.errors[0].should.have.property('param').eq('title')
+          response.should.have.status(400);
+          done();
+        });
+    });
 
-  //     it("Should fail to insert bad parameters endTime", (done) => {
-  //       const auction = {
-  //           "user_id": 1,
-  //           "title": 'cool auction BID HERE',
-  //           "category_id": 1, 
-  //           "description": "A cool thing", 
-  //           "endTime": 6, 
-  //           "start_price": 1.00
-  //       }
-  //       chai.request(server)
-  //       .post('/auctions')
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(auction)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('End time must either be 1, 3, 5, or 7')
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     });
-  //   });
+    it("Should fail to insert bad parameters endTime", (done) => {
+      const auction = {
+        "user_id": 1,
+        "title": 'cool auction BID HERE',
+        "category_id": 1,
+        "description": "A cool thing",
+        "endTime": 6,
+        "start_price": 1.00
+      }
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(auction)
+        .end((error, response) => {
+          response.text.should.be.eq('End time must either be 1, 3, 5, or 7')
+          response.should.have.status(400);
+          done();
+        });
+    });
+  });
 
-  // /**
-  //  * Test getting bid history of an auction part 1
-  //  */
-  //   describe('GET /auctions/bids/:auction_id', () => {
+  /**
+   * Test getting bid history of an auction part 1
+   */
+  describe('GET /api/v1/auctions/bids/:auction_id', () => {
 
-  //     it('Should not get the bid history of a non-existant auction', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/bids/1')
-  //       .end((error, response) => {
-  //         response.should.have.status(404)
-  //         response.text.should.be.eq('Currently no bids on this auction')
-  //         done();
-  //       })
-  //     })
-  //   })
+    it('Should not get the bid history of a non-existant auction', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/bids/1')
+        .end((error, response) => {
+          response.should.have.status(404)
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq('Currently no bids on this auction');
+          done();
+        })
+    })
+  })
 
-  //   /**
-  //    * Get an auction given the auction_id
-  //    */
-  //   describe('GET /auctions/:auction_id', () => {
-  //     it('Should get an auction given the id', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/1')
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.body.should.be.a('array');
-  //         response.body[0].should.have.property('auction_id');
-  //         response.body[0].should.have.property('user_id');
-  //         response.body[0].should.have.property('highest_bidder');
-  //         response.body[0].should.have.property('end_date');
-  //         done();
-  //       });
-  //     });
+  /**
+   * Get an auction given the auction_id
+   */
+  describe('GET /api/v1/auctions/:auction_id', () => {
+    it('Should get an auction given the id', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/1')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.data[0].should.have.property('auction_id');
+          response.body.data[0].should.have.property('user_id');
+          response.body.data[0].should.have.property('highest_bidder');
+          response.body.data[0].should.have.property('end_date');
+          done();
+        });
+    });
 
-  //     it('Should be unable to find a non-existant auction', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/10')
-  //       .end((error, response) => {
-  //         response.should.have.status(404);
-  //         response.text.should.be.eq('That auction could not be found')
-  //         done();
-  //       });
-  //     });
-  //   });
+    it('Should be unable to find a non-existant auction', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions//10')
+        .end((error, response) => {
+          response.should.have.status(404);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq('That auction could not be found');
+          done();
+        });
+    });
+  });
 
   //   /**
   //    * Test GET for auctions here since I want to test before the auction ends
