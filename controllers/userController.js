@@ -40,16 +40,18 @@ const createUser = async (req, res) => {
   const username = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
-  const hash = bcrypt.hashSync(password, 10)
+  const hash = await bcrypt.hash(password, 10)
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
   try {
+    // First check if the user exists in the database.
     const results = await db.pool.query('SELECT username, email FROM Users WHERE username=$1 OR email=$2', [username, email])
-    if (!results.rows[0]) {
+    if (results.rows[0]) {
       return res.status(400).json({ status: 'fail', message: 'That username or email already exists' })
     }
+    console.log(results.rows[0])
     await db.pool.query('INSERT INTO Users (username, email, password, feedback_score) VALUES ($1, $2, $3, $4) RETURNING user_id',
       [username, email, hash, 0])
     return res.status(200).send({ status: 'success', message: `Created username ${username}` });
@@ -126,7 +128,7 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ status: 'fail', message: 'That user does not exist' })
     }
     const hash = results.rows[0].password;
-    const correct = bcrypt.compare(password, hash)
+    const correct = await bcrypt.compare(password, hash)
     if (!correct) {
       return res.status(400).json({ status: 'fail', message: 'Incorrect password' });
     }
