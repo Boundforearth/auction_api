@@ -45,6 +45,19 @@ app.get('/', (req, res) => {
   res.send('Welcome to my app!')
 })
 
+/**
+ * @method POST
+ * @param {string} email
+ * @param {string} password
+ * Logs in a user based on their email and password
+ * Returns a JWT token to the user to be stored locally by the user
+ */
+app.post(
+  '/login',
+  v.validate('login'),
+  passport.authenticate('local', { session: false }),
+  auth.userLogin);
+
 
 app.use('/api/v1/users/', userRouter)
 app.use('/api/v1/auctions', auctionRouter)
