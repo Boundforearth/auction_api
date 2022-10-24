@@ -2,6 +2,7 @@ const express = require('express');
 const auctionController = require('../controllers/auctionController');
 const passport = require('passport');
 const v = require('../validation');
+const multer = require('multer');
 
 //Multer middleware for images
 //Use this to set up image storage in the file system.
@@ -31,3 +32,6 @@ router.route('/bids/:auction_id')
 
 router.route('/search/:keyword/:category_id')
   .get(auctionController.searchAuctions)
+
+
+module.exports = router

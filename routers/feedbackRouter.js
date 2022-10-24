@@ -10,3 +10,7 @@ router.route('/')
 
 router.route('/:user_id')
   .get(feedbackController.getFeedback)
+
+
+
+module.exports = router

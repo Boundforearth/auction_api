@@ -12,3 +12,7 @@ router.route('/:id')
   ////Need to fix validation
   .patch(v.validate('updateUsername'), passport.authenticate('jwt', { session: false }), userController.updateUser)
   .delete(v.validate('deleteUser'), passport.authenticate('jwt', { session: false }), userController.deleteUser)
+
+
+
+module.exports = router

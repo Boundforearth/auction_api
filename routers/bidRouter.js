@@ -6,3 +6,6 @@ const router = express.Router()
 
 router.route('/:user_id')
   .get(passport.authenticate('jwt', { session: false }), bidController.getBidHistory)
+
+
+module.exports = router
