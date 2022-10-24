@@ -136,9 +136,10 @@ describe('Auction API Tests', () => {
         .post('/api/v1/categories')
         .send(category)
         .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success');
+          response.body.should.have.property('message').eq('Inserted video games');
           response.should.have.status(200);
-          response.text.should.be.eq(`Inserted ${category.category}`);
-
           done();
         });
     });
@@ -149,7 +150,9 @@ describe('Auction API Tests', () => {
         .send(category)
         .end((error, response) => {
           response.should.have.status(400);
-          response.text.should.be.eq('That category is already in the DB');
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq('That category is already in the DB');
           done();
         });
     });

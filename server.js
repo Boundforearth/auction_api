@@ -4,7 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const handler = require('./handlers');
+const v = require('./validation');
+const passport = require('passport');
 const cors = require('cors');
+const auth = require('./auth')
 
 
 

@@ -26,7 +26,7 @@ const createCategory = async (req, res) => {
   const category = req.body.category;
   try {
     const checkCategory = await db.pool.query('SELECT category FROM Categories WHERE category=$1', [category])
-    if (!checkCategory.rows[0]) {
+    if (checkCategory.rows[0]) {
       return res.status(400).json({ status: 'fail', message: 'That category is already in the DB' })
     }
     const results = await db.pool.query('INSERT INTO Categories (category) VALUES ($1)', [category])
