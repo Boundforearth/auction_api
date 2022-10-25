@@ -1197,50 +1197,54 @@ describe('Auction API Tests', () => {
         });
     });
 
-    //   it('Should properly delete the account after the auction ends', (done) => {
-    //     const password = {
-    //       'password': '123456789'
-    //     }
-    //     setTimeout(() => {
-    //       chai.request(server)
-    //         .delete('/api/v1/users/1')
-    //         .set({ Authorization: `Bearer ${tokenUserOne}` })
-    //         .send(password)
-    //         .end((error, response) => {
-    //           response.text.should.be.eq(`User deleted with ID: 1`);
-    //           response.should.be.status(200)
-    //           done();
-    //         })
-    //     }, 1000 * 61)
-    //   }).timeout(1000 * 100)
+    it('Should properly delete the account after the auction ends', (done) => {
+      const password = {
+        'password': '123456789'
+      }
+      setTimeout(() => {
+        chai.request(server)
+          .delete('/api/v1/users/1')
+          .set({ Authorization: `Bearer ${tokenUserOne}` })
+          .send(password)
+          .end((error, response) => {
+            response.body.should.be.a('object');
+            response.body.should.have.property('message').eq('User deleted with ID: 1');
+            response.body.should.have.property('status').eq('success');
+            response.should.be.status(200)
+            done();
+          })
+      }, 1000 * 61)
+    }).timeout(1000 * 100)
 
-    //   it('Should NOT delete the account because not logged in', (done) => {
-    //     const password = {
-    //       'password': '12345678'
-    //     }
-    //     chai.request(server)
-    //       .delete('/api/v1/users/3')
-    //       .send(password)
-    //       .end((error, response) => {
-    //         response.text.should.be.eq(`Unauthorized`)
-    //         done();
-    //       });
-    //   });
+    it('Should NOT delete the account because not logged in', (done) => {
+      const password = {
+        'password': '12345678'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/3')
+        .send(password)
+        .end((error, response) => {
+          response.text.should.be.eq(`Unauthorized`)
+          done();
+        });
+    });
 
-    //   it('Should properly delete the account of the bidder after auction ends', (done) => {
-    //     const password = {
-    //       'password': '12345678'
-    //     }
-    //     chai.request(server)
-    //       .delete('/api/v1/users/3')
-    //       .set({ Authorization: `Bearer ${tokenUserThree}` })
-    //       .send(password)
-    //       .end((error, response) => {
-    //         response.text.should.be.eq(`User deleted with ID: 3`)
-    //         response.should.be.status(200)
-    //         done();
-    //       });
-    //   });
+    it('Should properly delete the account of the bidder after auction ends', (done) => {
+      const password = {
+        'password': '12345678'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/3')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(password)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('User deleted with ID: 3');
+          response.body.should.have.property('status').eq('success');
+          response.should.be.status(200)
+          done();
+        });
+    });
   });
 });
 
