@@ -10,7 +10,7 @@ router.route('/')
 router.route('/:user_id')
   .get(userController.getUserById)
   ////Need to fix validation
-  .patch(v.validate('updateUsername'), passport.authenticate('jwt', { session: false }), userController.updateUser)
+  .patch(v.validate('updateUser'), passport.authenticate('jwt', { session: false }), userController.updateUser)
   .delete(v.validate('deleteUser'), passport.authenticate('jwt', { session: false }), userController.deleteUser)
 
 

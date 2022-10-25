@@ -70,11 +70,12 @@ const updateUser = async (req, res) => {
   }
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('error while validating')
     return res.status(400).json({ errors: errors.array() });
   }
   let check = auth.verifyUser(req.headers.authorization, user_id)
   if (!check) {
-    return res.status(400).send('Users may only perform this action with their own account.');
+    return res.status(400).json({ status: 'fail', message: 'Users may only perform this action with their own account.' });
   }
   try {
     const results = await db.pool.query('SELECT password FROM Users WHERE user_id=$1', [user_id])
@@ -95,7 +96,7 @@ const updateUser = async (req, res) => {
       return res.status(200).send({ status: 'success', message: 'Your password has been updated' })
     } else if (newUsername) {
       if (username === newUsername) {
-        return res.status(400).json({ status: 'fail', message: 'Please Enter a new username.' })
+        return res.status(400).json({ status: 'fail', message: 'Please enter a new username.' })
       }
       await db.pool.query('UPDATE Users SET username=$1 WHERE user_id=$2', [newUsername, user_id])
       return res.status(200).json({ status: 'success', message: `Your username has been updated to ${newUsername}` })
@@ -117,7 +118,7 @@ const deleteUser = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   } else if (!check) {
-    return res.status(400).send('Users may only perform this action with their own account.');
+    return res.status(400).json({ status: 'fail', message: 'Users may only perform this action with their own account.' });
   }
   try {
     const results = await db.pool.query('SELECT password FROM Users WHERE user_id=$1', [user_id])
@@ -129,8 +130,8 @@ const deleteUser = async (req, res) => {
     if (!correct) {
       return res.status(400).json({ status: 'fail', message: 'Incorrect password' });
     }
-    const resultsTwo = await db.pool.query('SELECT * FROM LiveAuctions WHERE user_id=$1 OR highest_bidder=$2', [user_id, user_id])
-    if (!resultsTwo.rows[0]) {
+    const resultsTwo = await db.pool.query('SELECT * FROM LiveAuctions WHERE user_id=$1 OR highest_bidder=$1', [user_id])
+    if (resultsTwo.rows[0]) {
       return res.status(400).json({ status: 'fail', message: 'Cannot delete account while running an auction or bidding on an item' });
     }
     await db.pool.query('DELETE FROM Users WHERE user_id=$1', [user_id])

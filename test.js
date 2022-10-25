@@ -822,397 +822,426 @@ describe('Auction API Tests', () => {
     });
   });
 
-  //   /**
-  //    * Test getting a users bid history using the user_id.
-  //    * Only allowed to get their own history
-  //    */
-  //   describe('GET /bids/:user_id', () => {
-  //     it('Should get the bid history of a user', (done) => {
-  //       chai.request(server)
-  //       .get('/bids/' + 2)
-  //       .set({Authorization: `Bearer ${tokenUserTwo}`})
-  //       .end((error, response) => {
-  //         response.body.should.be.a('array')
-  //         response.should.have.status(200)
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('bid_id')
-  //           object.should.have.property('auction_id')
-  //           object.should.have.property('user_id')
-  //           object.should.have.property('price')
-  //           object.should.have.property('bid_time')
-  //         })
-  //         done();
-  //       })
-  //     })
+  /**
+   * Test getting a users bid history using the user_id.
+   * Only allowed to get their own history
+   */
+  describe('GET /api/v1/bids/:user_id', () => {
+    it('Should get the bid history of a user', (done) => {
+      chai.request(server)
+        .get('/api/v1/bids/' + 2)
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .end((error, response) => {
+          response.body.should.be.a('object')
+          response.should.have.status(200)
+          response.body.data.forEach((object) => {
+            object.should.have.property('bid_id')
+            object.should.have.property('auction_id')
+            object.should.have.property('user_id')
+            object.should.have.property('price')
+            object.should.have.property('bid_time')
+          })
+          done();
+        })
+    })
 
-  //     it('Should fail to get bid history due to not own account', (done) => {
-  //       chai.request(server)
-  //       .get('/bids/' + 2)
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Users may only perform this action with their own account.')
-  //         response.should.have.status(400)
-  //         done();
-  //       });
-  //     });
-  //     it('It should be denied access to the users bid history', (done) => {
-  //       const user_id = 1;
-  //       chai.request(server)
-  //       .get('/bids/' + user_id)
-  //       .end(function(error, response) {
-  //         response.text.should.be.eq('Unauthorized');
-  //         done();
-  //       });
-  //     });
-  //   });
-
-
-  //   describe('PUT /users/username/:user_id', () => {
-  //     it('Should update a users username', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'username': 'bowserbowser',
-  //         'newUsername': 'bowserjrindahouse'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Your username has been updated to bowserjrindahouse');
-  //         response.should.have.status(200);
-  //       done();
-  //       });
-  //     });
-  //     it('Should not update due to wrong password', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12348765',
-  //         'username': 'bowserjrindahouse',
-  //         'newUsername': 'bowsertakinitback'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('That password is not correct');
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     })
-  //     it('should not update due to wrong user', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'username': 'bowserjrindahouse',
-  //         'newUsername': 'mariostakinover'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .set({Authorization: `Bearer ${tokenUserTwo}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Users may only perform this action with their own account.');
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     })
-  //     it('Should not update due to same username', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'username': 'bowserjrindahouse',
-  //         'newUsername': 'bowserjrindahouse'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Please enter a new username');
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     })
-  //     it('Should not update due to username length', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'username': 'bowserjrindahouse',
-  //         'newUsername': 'bow'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.body.should.be.a('object');
-  //         response.body.errors.forEach((object) => {
-  //           object.should.have.property('param')
-  //         })
-  //       done();
-  //       });
-  //     })
-  //     it('Should not update because not logged in', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'username': 'bowserbowser',
-  //         'newUsername': 'bowserjrindahouse'
-  //       }
-  //       chai.request(server)
-  //       .put('/users/username/1')
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Unauthorized');
-  //       done();
-  //       });
-  //     });
-  //   });
-
-  //   describe('PUT /users/password/:user_id', () => {
-  //     it('Should update a user password', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '12345678',
-  //         'newPassword': '123456789',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.text.should.be.eq('Your password has been updated');
-  //         done();
-  //       })
-  //     })
-  //     it('Should fail to update due to password length', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '123456789',
-  //         'newPassword': '123',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.body.should.be.a('object')
-  //         response.body.errors.forEach((object) => {
-  //           object.should.have.property('param')
-  //         done();
-  //         })
-  //       })
-
-  //     })
-  //     it('Should fail to update due to wrong account', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '123456789',
-  //         'newPassword': 'StoleYourAccount',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .set({Authorization: `Bearer ${tokenUserTwo}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Users may only perform this action with their own account.');
-  //         response.should.have.status(400);
-  //       done();
-  //       });
-  //     });
-  //     it('Should fail to update due to same password', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '123456789',
-  //         'newPassword': '123456789',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('That is your current password')
-  //         response.should.have.status('400')
-  //       done();
-  //       })
-  //     })
-  //     it('Should fail to update due to wrong password',(done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '123456789123456',
-  //         'newPassword': '123456789',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('That password is not correct')
-  //         response.should.have.status('400')
-  //         done();
-  //       })
-  //     })
-  //     it('Should update a user password', (done) => {
-  //       const userInfo = {
-  //         'user_id': 1,
-  //         'password': '123456789',
-  //         'newPassword': '1234567890',
-  //       }
-  //       chai.request(server)
-  //       .put('/users/password/1')
-  //       .send(userInfo)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Unauthorized');
-  //         done();
-  //       })
-  //     })
-  //   })
+    it('Should fail to get bid history due to not own account', (done) => {
+      chai.request(server)
+        .get('/api/v1/bids/' + 2)
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Users may only perform this action with their own account.');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400)
+          done();
+        });
+    });
+    it('It should be denied access to the users bid history', (done) => {
+      const user_id = 1;
+      chai.request(server)
+        .get('/api/v1/bids/' + user_id)
+        .end(function (error, response) {
+          response.text.should.be.eq('Unauthorized');
+          done();
+        });
+    });
+  });
 
 
-  //   describe('DELETE /users/user:id', () => {
-  //     it('should create an auction to prevent account deletion later', (done) => {
-  //       const auction = {
-  //         "user_id": 1,
-  //         "title": "My auction BID HERE!",
-  //         "category_id": 1, 
-  //         "description": "A cool thing", 
-  //         "endTime": 1, 
-  //         "start_price": 1.00
-  //     }
-  //     chai.request(server)
-  //     .post('/auctions')
-  //     .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //     .send(auction)
-  //     .end((error, response) => {
-  //       response.should.have.status(200);
-  //       done();
-  //       });
-  //     });
+  describe('PATCH /users/:user_id', () => {
+    it('Should update a users username', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'username': 'bowserbowser',
+        'newUsername': 'bowserjrindahouse'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Your username has been updated to bowserjrindahouse');
+          response.body.should.have.property('status').eq('success');
+          response.should.have.status(200);
+          done();
+        });
+    });
+    it('Should not update due to wrong password', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12348765',
+        'username': 'bowserjrindahouse',
+        'newUsername': 'bowsertakinitback'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Incorrect password');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400);
+          done();
+        });
+    })
+    it('should not update due to wrong user', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'username': 'bowserjrindahouse',
+        'newUsername': 'mariostakinover'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq('Users may only perform this action with their own account.');
+          response.should.have.status(400);
+          done();
+        });
+    })
+    it('Should not update due to same username', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'username': 'bowserjrindahouse',
+        'newUsername': 'bowserjrindahouse'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Please enter a new username.');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400);
+          done();
+        });
+    })
+    it('Should not update due to username length', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'username': 'bowserjrindahouse',
+        'newUsername': 'bow'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.errors.forEach((object) => {
+            object.should.have.property('param')
+          })
+          done();
+        });
+    })
+    it('Should not update because not logged in', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'username': 'bowserbowser',
+        'newUsername': 'bowserjrindahouse'
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .send(userInfo)
+        .end((error, response) => {
+          response.text.should.be.eq('Unauthorized');
+          done();
+        });
+    });
+  });
 
-  //     it('Should place a bid to prevent account deletion', (done) => {
-  //       const bid = {
-  //         "bid": 5.0015672,
-  //         "user_id": 3
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/2')
-  //       .set({ Authorization: `Bearer ${tokenUserThree}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.text.should.be.eq("You're the highest bidder!")
-  //       done()
-  //       });
-  //     })
+  describe('PATCH /api/v1/users/:user_id', () => {
+    it('Should update a user password', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '12345678',
+        'newPassword': '123456789',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Your password has been updated');
+          response.body.should.have.property('status').eq('success');
+          done();
+        })
+    })
+    it('Should fail to update due to password length', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '123456789',
+        'newPassword': '123',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object')
+          response.body.errors.forEach((object) => {
+            object.should.have.property('param')
+            done();
+          })
+        })
 
-  //     it("Should fail to delete because Mario can't delete Bowser's account", (done) => {
-  //       const password = {
-  //         'password': '123456789'
-  //       }
-  //       chai.request(server)
-  //       .delete('/users/1')
-  //       .set({ Authorization: `Bearer ${tokenUserTwo}` })
-  //       .send(password)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq('Users may only perform this action with their own account.');
-  //         done();
-  //       });
-  //     });
+    })
+    it('Should fail to update due to wrong account', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '123456789',
+        'newPassword': 'StoleYourAccount',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Users may only perform this action with their own account.');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400);
+          done();
+        });
+    });
+    it('Should fail to update due to same password', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '123456789',
+        'newPassword': '123456789',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('That is your current password');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status('400');
+          done();
+        })
+    })
+    it('Should fail to update due to wrong password', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '123456789123456',
+        'newPassword': '123456789',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(userInfo)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Incorrect password');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status('400');
+          done();
+        })
+    })
+    it('Should update a user password', (done) => {
+      const userInfo = {
+        'user_id': 1,
+        'password': '123456789',
+        'newPassword': '1234567890',
+      }
+      chai.request(server)
+        .patch('/api/v1/users/1')
+        .send(userInfo)
+        .end((error, response) => {
+          response.text.should.be.eq('Unauthorized');
+          done();
+        })
+    })
+  })
 
-  //     it('Should fail to delete account due to incorrect password', (done) => {
-  //       const password = {
-  //         'password': '12345678910'
-  //       }
-  //       chai.request(server)
-  //       .delete('/users/1')
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(password)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq('Incorrect password');
-  //         done();
-  //       });
-  //     });
 
-  //     it('Should fail to delete account because seller has a live auction', (done) => {
-  //       const password = {
-  //         'password': '123456789'
-  //       }
-  //       chai.request(server)
-  //       .delete('/users/1')
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(password)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq('Cannot delete account while running an auction or bidding on an item');
-  //         done();
-  //       });
-  //     });
+  describe('DELETE /api/v1/users/user:id', () => {
+    it('should create an auction to prevent account deletion later', (done) => {
+      const auction = {
+        "user_id": 1,
+        "title": "My auction BID HERE!",
+        "category_id": 1,
+        "description": "A cool thing",
+        "endTime": 1,
+        "start_price": 1.00
+      }
+      chai.request(server)
+        .post('/api/v1/auctions')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(auction)
+        .end((error, response) => {
+          response.should.have.status(200);
+          done();
+        });
+    });
 
-  //     it('Should fail to delete account because buyer has an active winning bid', (done) => {
-  //       const password = {
-  //         'password': '12345678'
-  //       }
-  //       chai.request(server)
-  //       .delete('/users/3')
-  //       .set({ Authorization: `Bearer ${tokenUserThree}` })
-  //       .send(password)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq('Cannot delete account while running an auction or bidding on an item');
-  //         done();
-  //       });
-  //     });
+    it('Should place a bid to prevent account deletion', (done) => {
+      const bid = {
+        "bid": 5.0015672,
+        "user_id": 3
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/2')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(bid)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq("You're the highest bidder!");
+          response.body.should.have.property('status').eq('success');
+          done();
+        });
+    })
 
-  //     it('Should properly delete the account after the auction ends', (done) => {
-  //       const password = {
-  //         'password': '123456789'
-  //       }
-  //       setTimeout(() => {
-  //         chai.request(server)
-  //         .delete('/users/1')
-  //         .set({Authorization: `Bearer ${tokenUserOne}`})
-  //         .send(password)
-  //         .end((error, response) => {
-  //           response.text.should.be.eq(`User deleted with ID: 1`);
-  //           response.should.be.status(200)
-  //         done();
-  //         })}, 1000*61)
-  //     }).timeout(1000*100)
+    it("Should fail to delete because Mario can't delete Bowser's account", (done) => {
+      const password = {
+        'password': '123456789'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(password)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Users may only perform this action with their own account.');
+          response.body.should.have.property('status').eq('fail');
+          done();
+        });
+    });
 
-  //     it('Should NOT delete the account because not logged in', (done) => {
-  //       const password = {
-  //         'password': '12345678'
-  //       }
-  //       chai.request(server)
-  //         .delete('/users/3')
-  //         .send(password)
-  //         .end((error, response) => {
-  //           response.text.should.be.eq(`Unauthorized`)
-  //         done();
-  //       });
-  //     });
+    it('Should fail to delete account due to incorrect password', (done) => {
+      const password = {
+        'password': '12345678910'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(password)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Incorrect password');
+          response.body.should.have.property('status').eq('fail');
+          done();
+        });
+    });
 
-  //     it('Should properly delete the account of the bidder after auction ends', (done) => {
-  //       const password = {
-  //         'password': '12345678'
-  //       }
-  //       chai.request(server)
-  //         .delete('/users/3')
-  //         .set({Authorization: `Bearer ${tokenUserThree}`})
-  //         .send(password)
-  //         .end((error, response) => {
-  //           response.text.should.be.eq(`User deleted with ID: 3`)
-  //           response.should.be.status(200)
-  //         done();
-  //       });
-  //     });
-  //   });
+    it('Should fail to delete account because seller has a live auction', (done) => {
+      const password = {
+        'password': '123456789'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/1')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(password)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Cannot delete account while running an auction or bidding on an item');
+          response.body.should.have.property('status').eq('fail');
+          done();
+        });
+    });
+
+    it('Should fail to delete account because buyer has an active winning bid', (done) => {
+      const password = {
+        'password': '12345678'
+      }
+      chai.request(server)
+        .delete('/api/v1/users/3')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(password)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Cannot delete account while running an auction or bidding on an item');
+          response.body.should.have.property('status').eq('fail');
+          done();
+        });
+    });
+
+    //   it('Should properly delete the account after the auction ends', (done) => {
+    //     const password = {
+    //       'password': '123456789'
+    //     }
+    //     setTimeout(() => {
+    //       chai.request(server)
+    //         .delete('/api/v1/users/1')
+    //         .set({ Authorization: `Bearer ${tokenUserOne}` })
+    //         .send(password)
+    //         .end((error, response) => {
+    //           response.text.should.be.eq(`User deleted with ID: 1`);
+    //           response.should.be.status(200)
+    //           done();
+    //         })
+    //     }, 1000 * 61)
+    //   }).timeout(1000 * 100)
+
+    //   it('Should NOT delete the account because not logged in', (done) => {
+    //     const password = {
+    //       'password': '12345678'
+    //     }
+    //     chai.request(server)
+    //       .delete('/api/v1/users/3')
+    //       .send(password)
+    //       .end((error, response) => {
+    //         response.text.should.be.eq(`Unauthorized`)
+    //         done();
+    //       });
+    //   });
+
+    //   it('Should properly delete the account of the bidder after auction ends', (done) => {
+    //     const password = {
+    //       'password': '12345678'
+    //     }
+    //     chai.request(server)
+    //       .delete('/api/v1/users/3')
+    //       .set({ Authorization: `Bearer ${tokenUserThree}` })
+    //       .send(password)
+    //       .end((error, response) => {
+    //         response.text.should.be.eq(`User deleted with ID: 3`)
+    //         response.should.be.status(200)
+    //         done();
+    //       });
+    //   });
+  });
 });
 
 
