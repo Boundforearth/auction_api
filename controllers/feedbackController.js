@@ -6,12 +6,15 @@ const auth = require('../auth');
 const handleFeedback = async (req, res, user_id, feedback_poster_id, auction_id, feedback_score, feedback, role) => {
   try {
     /// First, find auction by ID and make sure the user is allowed to leave feedback
-    const results = await db.pool.query("SELECT highest_bidder, end_price FROM Auctions WHERE auction_id=$1", [auction_id])
-
+    const results = await db.pool.query("SELECT highest_bidder, end_price, user_id FROM Auctions WHERE auction_id=$1", [auction_id])
     // Handle the results
     if (!results.rows[0]) {
       return res.status(400).json({ status: 'fail', message: 'No winner found for this auction.  Cannot leave feedback' });
-    } else if ((results.rows[0].highest_bidder !== feedback_poster_id && role !== 'buyer') || (results.rows[0].user_id !== feedback_poster_id && role !== 'seller')) {
+
+      // If your role is 'buyer' but you are not the highest bidder, or if your role is seller but you did not create the auction, you are not authorized to leave feedback.
+    } else if (results.rows[0].highest_bidder !== feedback_poster_id && role === 'buyer') {
+      return res.status(400).json({ status: 'fail', message: 'You are not allowed to leave feedback on this auction' });
+    } else if (results.rows[0].user_id !== feedback_poster_id && role === 'seller') {
       return res.status(400).json({ status: 'fail', message: 'You are not allowed to leave feedback on this auction' });
     } else if (results.rows[0].end_price === null) {
       return res.status(400).json({ status: 'fail', message: 'You are not allowed to leave feedback on this auction' });
@@ -23,9 +26,10 @@ const handleFeedback = async (req, res, user_id, feedback_poster_id, auction_id,
         [user_id, feedback_poster_id, auction_id, feedback_score, feedback])
       await db.pool.query('UPDATE Users SET feedback_score = feedback_score + $1 WHERE user_id=$2',
         [feedback_score, user_id])
-
       // If no errors, return a positive result
       return res.status(200).json({ status: 'success', message: 'Thank you for leaving feedback' });
+
+
     } else if (role === 'seller') {
       await db.pool.query("INSERT INTO Feedback (user_id, poster_id, auction_id, feedback_score, feedback) VALUES($1, $2, $3, $4, $5)",
         [user_id, feedback_poster_id, auction_id, feedback_score, feedback])
@@ -35,6 +39,7 @@ const handleFeedback = async (req, res, user_id, feedback_poster_id, auction_id,
 
     // Handle any errors from above DB queries
   } catch (err) {
+    console.log(error)
     return res.status(400).json({ status: 'fail', message: err })
   }
 }
@@ -52,6 +57,8 @@ const handleFeedback = async (req, res, user_id, feedback_poster_id, auction_id,
 
 const leaveFeedback = async (req, res) => {
   try {
+
+    // user_id is the person receiving feedback, while feedback_posetr_id is the person LEAVING the feedback
     const { user_id, feedback_poster_id, auction_id, feedback_score, feedback, role } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -59,15 +66,16 @@ const leaveFeedback = async (req, res) => {
     }
     let check = auth.verifyUser(req.headers.authorization, feedback_poster_id)
     if (!check) {
-      return res.status(400).send('Users may only perform this action with their own account.');
+      return res.status(400).json({ status: 'fail', message: 'Users may only perform this action with their own account.' });
     } else if (feedback_score !== -1 && feedback_score !== 0 && feedback_score !== 1) {
-      return res.status(400).send({ status: 'fail', message: 'Feedback must be -1, 0, or 1' })
+      return res.status(400).json({ status: 'fail', message: 'Feedback must be -1, 0, or 1' })
     }
     const results = await db.pool.query('SELECT * FROM Feedback WHERE auction_id=$1 AND poster_id=$2', [auction_id, feedback_poster_id])
-    if (!results.rows[0]) {
-      return res.status(400).send({ status: 'fail', message: 'You have already left feedback for this auction' });
+    if (results.rows[0]) {
+      return res.status(400).json({ status: 'fail', message: 'You have already left feedback for this auction' });
     } else if (role !== 'buyer' && role !== 'seller') {
-      return res.status(400).send({ status: 'fail', message: 'Please select your role in the auction' });
+      console.log(role)
+      return res.status(400).json({ status: 'fail', message: 'Please select your role in the auction' });
     }
     return await handleFeedback(req, res, user_id, feedback_poster_id, auction_id, feedback_score, feedback, role)
   } catch (err) {
@@ -88,9 +96,10 @@ const getFeedback = async (req, res) => {
   try {
     const user_id = req.params.user_id;
     const results = await db.pool.query('SELECT * FROM Feedback WHERE user_id=$1', [user_id])
-    return res.status(200).json({ status: 'success', data: { results: results.rows } })
+    if (!results.rows[0]) return res.status(404).json({ status: 'fail', message: "Could not find that user or they have no feedback" })
+    return res.status(200).json({ status: 'success', data: results.rows })
   } catch (err) {
-    return res.status(404).json({ status: 'fail', message: 'err' })
+    return res.status(404).json({ status: 'fail', message: err })
   }
 };
 

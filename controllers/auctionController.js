@@ -107,7 +107,7 @@ const placeBid = async (req, res) => {
     //Need to check if auction is actually live first
     const auction = await db.pool.query('SELECT * FROM LiveAuctions WHERE auction_id=$1', [auction_id])
     if (!auction.rows[0]) {
-      return res.status(400).json({ status: 'fail', message: 'That auction does not exist' })
+      return res.status(400).json({ status: 'fail', message: 'That auction does not exist or has ended' })
     }
     const results = await db.pool.query('SELECT user_id, end_date, current_price, bid_count, highest_bid, highest_bidder FROM Auctions WHERE auction_id=$1', [auction_id])
 
@@ -115,21 +115,29 @@ const placeBid = async (req, res) => {
     const auctioneer = results.rows[0].user_id;
     const end_date = results.rows[0].end_time;
     const current_price = results.rows[0].current_price;
-    let increment = calculateIncrement(current_price);
     const highest_bid = results.rows[0].highest_bid;
     const highest_bidder = results.rows[0].highest_bidder;
+
+    // Calculate current bid increment
+    let increment = calculateIncrement(current_price);
+
+    // Increment number of bids
     let bid_count = results.rows[0].bid_count;
-    let bidToInput = 0
     bid_count += 1;
+
+    // set the bid we need to input equal to zero.
+    let bidToInput = 0
+
+    //Set the current date
     let today = new Date().toUTCString();
 
     //Don't allow bids if the auction has already ended!
     if (today >= end_date) return res.status(400).json({ status: 'fail', message: "The auction has already ended" });
 
-    //Don't allow bids of the price is not higher than the necessary increment
+    //Don't allow bids if the bid is not higher than the minimum bid required to place a new bid
     if (bid < (current_price + increment)) return res.status(400).json({ status: 'fail', message: 'Please enter a higher bid' });
 
-    //Prevents auctioneer from artificially raising the price of their own auctions
+    //Do not allow the acutioneer to bid on their own items and artificially raise the price
     if (user_id === auctioneer) return res.status(400).json({ status: 'fail', message: "You can't bid on your own auctions" })
 
     //If the highest bidder makes a new bid, we need to compare it to their old bid, not the current price
@@ -140,7 +148,9 @@ const placeBid = async (req, res) => {
       if (bid <= highest_bid) return res.status(400).json({ status: 'fail', message: 'Please enter a higher bid' });
 
       // If the bid was high enough, proceed with making a request to the database
+      // After this, skip to functions end to return highest bidder message
       await db.pool.query('UPDATE Auctions SET highest_bid=$1, bid_count=$2 WHERE auction_id=$3', [bid, bid_count, auction_id])
+
 
       //If there are no current bids, current price should not change
       //If the bid is higher than the highest bid, we need to handle what the current bid is in regards to price increments
@@ -155,6 +165,7 @@ const placeBid = async (req, res) => {
         bidToInput = highest_bid + calculateIncrement(highest_bid);
       }
 
+      // Since the bid will be the highest bid, skip to the end of the function to display highest bidder message
       await db.pool.query('UPDATE Auctions SET highest_bidder=$1, current_price=$2, highest_bid=$3, bid_count=$4 WHERE auction_id=$5', [user_id, bidToInput, bid, bid_count, auction_id])
       await db.pool.query('UPDATE LiveAuctions SET highest_bidder=$1, current_price=$2 WHERE auction_id=$3', [user_id, bidToInput, auction_id])
 
@@ -168,18 +179,17 @@ const placeBid = async (req, res) => {
       } else {
         bidToInput = bid + calculateIncrement(bid)
       }
-
       await db.pool.query('UPDATE Auctions SET current_price=$1, bid_count=$2 WHERE auction_id=$3', [bidToInput, bid_count, auction_id])
       await db.pool.query('UPDATE LiveAuctions SET highest_bidder=$1, current_price=$2 WHERE auction_id=$3', [user_id, bidToInput, auction_id])
+
+      // After figureing the new bid info, we should return that the bid was not high enough.
+      return res.status(200).json({ status: 'success', message: 'Another user still has a higher bid' })
     }
-
-    //Don't return, otherwise bid will not be entered into Bids table 
-    res.status(200).json({ status: 'fail', message: `You're the highest bidder!` })
-
     await db.pool.query('INSERT INTO Bids (auction_id, user_id, price, bid_time) VALUES($1, $2, $3, $4)', [auction_id, user_id, bid, today])
+    return res.status(200).json({ status: 'success', message: `You're the highest bidder!` })
   }
   catch (err) {
-    res.status(400).json({ status: 'fail', message: err })
+    return res.status(400).json({ status: 'fail', message: err })
   }
 };
 
@@ -199,16 +209,16 @@ const searchAuctions = async (req, res) => {
     if (category_id == 0) {
       const results = await db.pool.query('SELECT auction_id, title, image_path FROM LiveAuctions WHERE title ILIKE $1 ORDER BY end_date', ['%' + keyword + '%'])
       if (!results.rows[0]) {
-        return res.status(200).json({ status: 'success', results: results.rows })
-      } else {
         return res.status(404).json({ status: 'fail', message: 'No auctions found for that keyword' })
+      } else {
+        return res.status(200).json({ status: 'success', data: results.rows })
       }
     } else {
       const results = await db.pool.query('SELECT auction_id, title, image_path FROM LiveAuctions WHERE title ILIKE $1 AND category_id=$2 ORDER BY end_date', ['%' + keyword + '%', category_id])
       if (!results.rows[0]) {
-        return res.status(200).json({ status: 'success', results: results.rows })
-      } else {
         return res.status(404).json({ status: 'fail', message: 'No auctions found for that keyword' })
+      } else {
+        return res.status(200).json({ status: 'success', data: results.rows })
       }
     }
   }

@@ -365,7 +365,7 @@ describe('Auction API Tests', () => {
 
     it('Should be unable to find a non-existant auction', (done) => {
       chai.request(server)
-        .get('/api/v1/auctions//10')
+        .get('/api/v1/auctions/10')
         .end((error, response) => {
           response.should.have.status(404);
           response.body.should.be.a('object');
@@ -376,418 +376,451 @@ describe('Auction API Tests', () => {
     });
   });
 
-  //   /**
-  //    * Test GET for auctions here since I want to test before the auction ends
-  //    */
-  //   describe('GET /auctions/search/:keyword/:category_id', () => {
-  //     it('Should get a list of auctions given a keyword and category', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/search/bid/1')
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.body.should.be.a('array');
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('auction_id')
-  //           object.should.have.property('title')
-  //         })
-  //         done()
-  //       });
-  //     });
+  /**
+   * Test GET for auctions here since I want to test before the auction ends
+   */
+  describe('GET /auctions/search/:keyword/:category_id', () => {
+    it('Should get a list of auctions given a keyword and category', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/search/bid/1')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.data.forEach((object) => {
+            object.should.have.property('auction_id')
+            object.should.have.property('title')
+          })
+          done()
+        });
+    });
 
-  //     it('Should get a list of auctions given a keyword', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/search/bid/0')
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.body.should.be.a('array');
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('auction_id')
-  //           object.should.have.property('title')
-  //         })
-  //         done()
-  //       })
-  //     })
+    it('Should get a list of auctions given a keyword', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/search/bid/0')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.data.forEach((object) => {
+            object.should.have.property('auction_id')
+            object.should.have.property('title')
+          })
+          done()
+        })
+    })
 
-  //     it('Should fail to get a list of auctions', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/search/banana/0')
-  //       .end((error, response) => {
-  //         response.should.have.status(404);
-  //         response.text.should.be.eq('No auctions found for that keyword');
-  //       done();
-  //       });
-  //     });
-  //   });
+    it('Should fail to get a list of auctions', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/search/banana/0')
+        .end((error, response) => {
+          response.should.have.status(404);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail')
+          response.body.should.have.property('message').eq('No auctions found for that keyword');
+          done();
+        });
+    });
+  });
 
-  //   /**
-  //    * Placing bids
-  //    **/
-  //   describe('PUT /auctions/:auction_id', () => {
-  //     const auction_id = 1
-  //     it('Should create a second user', (done) => {
-  //       const user = {
-  //         'username': 'mariomario',
-  //         'password': '12345678',
-  //         'email': 'mario@jank.com'
-  //       }
-  //       chai.request(server)
-  //       .post('/users')
-  //       .send(user)
-  //       .end((error, response) => {
-  //         response.should.be.status(200);
-  //         response.text.should.be.eq(`Created username ${user.username}`);
-  //       done();
-  //       });
-  //     });
+  /**
+   * Placing bids
+   **/
+  describe('PATCH /api/v1/auctions/:auction_id', () => {
+    const auction_id = 1
+    it('Should create a second user', (done) => {
+      const user = {
+        'username': 'mariomario',
+        'password': '12345678',
+        'email': 'mario@jank.com'
+      }
+      chai.request(server)
+        .post('/api/v1/users')
+        .send(user)
+        .end((error, response) => {
+          response.should.be.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success')
+          response.body.should.have.property('message').eq(`Created username ${user.username}`);
+          done();
+        });
+    });
 
-  //     it('Should create a third user', (done) => {
-  //       const user2 = {
-  //         'username': 'luigiluigi',
-  //         'password': '12345678',
-  //         'email': 'luigi@jank.com'
-  //       }
-  //       chai.request(server)
-  //       .post('/users')
-  //       .send(user2)
-  //       .end((error, response) => {
-  //         response.should.be.status(200);
-  //         response.text.should.be.eq(`Created username ${user2.username}`);
-  //       done();
-  //       })
-  //     })
+    it('Should create a third user', (done) => {
+      const user2 = {
+        'username': 'luigiluigi',
+        'password': '12345678',
+        'email': 'luigi@jank.com'
+      }
+      chai.request(server)
+        .post('/api/v1/users')
+        .send(user2)
+        .end((error, response) => {
+          response.should.be.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success')
+          response.body.should.have.property('message').eq(`Created username ${user2.username}`);
+          done();
+        })
+    })
 
-  //     it('Should log in the second user', (done) => {
-  //       const login = {
-  //         'email':'mario@jank.com',
-  //         'password': '12345678'
-  //       }
-  //       chai.request(server)
-  //       .post('/login')
-  //       .send(login)
-  //       .end((error, response) => {
-  //         tokenUserTwo = response.body.token
-  //         response.should.be.status(200);
-  //       done();
-  //       })
-  //     })
+    it('Should log in the second user', (done) => {
+      const login = {
+        'email': 'mario@jank.com',
+        'password': '12345678'
+      }
+      chai.request(server)
+        .post('/login')
+        .send(login)
+        .end((error, response) => {
+          tokenUserTwo = response.body.token
+          response.should.be.status(200);
+          done();
+        })
+    })
 
-  //     it('Should log in the third user', (done) => {
-  //       const login2 = {
-  //         'email':'luigi@jank.com',
-  //         'password': '12345678'
-  //       }
-  //       chai.request(server)
-  //       .post('/login')
-  //       .send(login2)
-  //       .end((error, response) => {
-  //         tokenUserThree = response.body.token
-  //         response.should.be.status(200);
-  //       done();
-  //       });
-  //     })
-
-
-  //     it('Should place a bid and become the highest bidder', (done) => {
-  //       const bid = {
-  //         "bid": 5.0015672,
-  //         "user_id": 2
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserTwo}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq("You're the highest bidder!")
-  //         response.should.have.status(200);
-  //       done()
-  //       });
-  //     });
-
-  //     it('Should place a bid successfully w/out highest bidder message', (done) => {
-  //       const bid = {
-  //         "bid": 50,
-  //         "user_id": 2
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserTwo}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq("You have successfully placed your bid");
-  //         response.should.have.status(200);
-  //       done()
-  //         });
-  //       });
-
-  //     it('Should not allow the bid and give a message saying a higher bid is necessary', (done) => {
-  //       const bid = {
-  //         "bid": 20,
-  //         "user_id": 2
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserTwo}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq('Please enter a higher bid')
-  //       done()
-  //       });
-  //     });
-
-  //     it('Should not allow a bid from the auction creator', (done) => {
-  //       const bid = {
-  //         "bid": 100,
-  //         "user_id": 1
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserOne}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.should.have.status(400);
-  //         response.text.should.be.eq("You can't bid on your own auctions")
-  //       done()
-  //       });
-  //     });
-
-  //     it('Should tell the user that there is still a higher bid', (done) => {
-  //       const bid = {
-  //         "bid": 30,
-  //         "user_id": 3
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserThree}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.text.should.be.eq('Another user still has a higher bid')
-  //       done()
-  //       });
-  //     });
-
-  //     it('Should not allow bids when not logged in', (done) => {
-  //       const bid = {
-  //         "bid": 3000,
-  //         "user_id": 3
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Unauthorized')
-  //       done()
-  //       });
-  //     });
-
-  //     it('Should tell the user they are the highest bidder', (done) => {
-  //       const bid = {
-  //         "bid": 100,
-  //         "user_id": 3
-  //         }
-  //       chai.request(server)
-  //       .put('/auctions/' + auction_id)
-  //       .set({ Authorization: `Bearer ${tokenUserThree}` })
-  //       .send(bid)
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.text.should.be.eq("You're the highest bidder!")
-  //       done()
-  //       });
-  //     });
+    it('Should log in the third user', (done) => {
+      const login2 = {
+        'email': 'luigi@jank.com',
+        'password': '12345678'
+      }
+      chai.request(server)
+        .post('/login')
+        .send(login2)
+        .end((error, response) => {
+          tokenUserThree = response.body.token
+          response.should.be.status(200);
+          done();
+        });
+    })
 
 
+    it('Should place a bid and become the highest bidder', (done) => {
+      const bid = {
+        "bid": 5.0015672,
+        "user_id": 2
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(bid)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success')
+          response.body.should.have.property('message').eq("You're the highest bidder!");
+          response.should.have.status(200);
+          done()
+        });
+    });
 
-  //     // Test Leaving feedback before auction ends...
-  //     //forgive the placement
-  //     it("Should be unable to leave feedback when the auction is not over", (done) => {
-  //       const feedback= {
-  //         "user_id": 1,
-  //         "feedback_poster_id": 3,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "What a sucker. Where do you think my castle funds come from?!?",
-  //         "role": "Seller"
-  //       }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .set({Authorization: `Bearer ${tokenUserThree}`})
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.should.have.status(400)
-  //         response.text.should.be.eq('You are not allowed to leave feedback on this auction');
-  //         done();
-  //       });
-  //     });
+    it('Should place a bid successfully w/out highest bidder message', (done) => {
+      const bid = {
+        "bid": 50,
+        "user_id": 2
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(bid)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success')
+          response.body.should.have.property('message').eq("You're the highest bidder!");
+          response.should.have.status(200);
+          done()
+        });
+    });
+
+    it('Should not allow the bid and give a message saying a higher bid is necessary', (done) => {
+      const bid = {
+        "bid": 20,
+        "user_id": 2
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(bid)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail')
+          response.body.should.have.property('message').eq('Please enter a higher bid')
+          done()
+        });
+    });
+
+    it('Should not allow a bid from the auction creator', (done) => {
+      const bid = {
+        "bid": 100,
+        "user_id": 1
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(bid)
+        .end((error, response) => {
+          response.should.have.status(400);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail');
+          response.body.should.have.property('message').eq("You can't bid on your own auctions")
+          done()
+        });
+    });
+
+    it('Should tell the user that there is still a higher bid', (done) => {
+      const bid = {
+        "bid": 30,
+        "user_id": 3
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(bid)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Another user still has a higher bid');
+          response.body.should.have.property('status').eq('success');
+          done()
+        });
+    });
+
+    it('Should not allow bids when not logged in', (done) => {
+      const bid = {
+        "bid": 3000,
+        "user_id": 3
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .send(bid)
+        .end((error, response) => {
+          response.text.should.be.eq('Unauthorized')
+          done()
+        });
+    });
+
+    it('Should tell the user they are the highest bidder', (done) => {
+      const bid = {
+        "bid": 100,
+        "user_id": 3
+      }
+      chai.request(server)
+        .patch('/api/v1/auctions/' + auction_id)
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(bid)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('success');
+          response.body.should.have.property('message').eq("You're the highest bidder!");
+          done()
+        });
+    });
 
 
-  //     it('Should fail to place a bid due to the auction ending', (done) => {
-  //       const bid = {
-  //         "bid": 100,
-  //         "user_id": 3
-  //         };
-  //       setTimeout(() => {
-  //         chai.request(server)
-  //         .put('/auctions/' + auction_id)
-  //         .set({Authorization: `Bearer ${tokenUserThree}`})
-  //         .send(bid)
-  //         .end((error, response) => {
-  //           response.should.have.status(400)
-  //           response.text.should.be.eq("That auction does not exist")
-  //         done()
-  //         })
-  //       }, 1000*61)
-  //     }).timeout(1000*100);
-  //   });
 
-  //   describe('GET /auctions/bids/1', () => {
-  //     it('Should get the bid history of the auction', (done) => {
-  //       chai.request(server)
-  //       .get('/auctions/bids/1')
-  //       .end((error, response) => {
-  //         response.should.have.status(200)
-  //         response.body.should.be.a('array')
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('price')
-  //           object.should.have.property('bid_time')
-  //         })
-  //         done();
-  //       })
-  //     })
-  //   })
+    // Test Leaving feedback before auction ends...
+    //forgive the placement
+    it("Should be unable to leave feedback when the auction is not over", (done) => {
+      const feedback = {
+        "user_id": 1,
+        "feedback_poster_id": 3,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "What a sucker. Where do you think my castle funds come from?!?",
+        "role": "seller"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(feedback)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('status').eq('fail')
+          response.body.should.have.property('message').eq('You are not allowed to leave feedback on this auction');
+          response.should.have.status(400)
+          done();
+        });
+    });
 
-  //   describe('POST /feedback', () => {
-  //     it("Should properly leave feedback on the auction as the buyer", (done) => {
-  //       const feedback= {
-  //         "user_id": 1,
-  //         "feedback_poster_id": 3,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "This loser never shipped the item and stole my money",
-  //         "role": "Buyer"
-  //     }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .set({Authorization: `Bearer ${tokenUserThree}`})
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Thank you for leaving feedback');
-  //         response.should.have.status(200);
-  //         done();
-  //       });
-  //     });
 
-  //     it("Should NOT leave feedback because feedback already left", (done) => {
-  //       const feedback= {
-  //         "user_id": 1,
-  //         "feedback_poster_id": 3,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "This loser never shipped the item and stole my money",
-  //         "role": "Buyer"
-  //       }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .set({Authorization: `Bearer ${tokenUserThree}`})
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('You have already left feedback for this auction');
-  //         response.should.have.status(400);
-  //         done();
-  //       });
-  //     });
+    it('Should fail to place a bid due to the auction ending', (done) => {
+      const bid = {
+        "bid": 100,
+        "user_id": 3
+      };
+      setTimeout(() => {
+        chai.request(server)
+          .patch('/api/v1/auctions/' + auction_id)
+          .set({ Authorization: `Bearer ${tokenUserThree}` })
+          .send(bid)
+          .end((error, response) => {
+            response.should.have.status(400)
+            response.body.should.be.a('object');
+            response.body.should.have.property('status').eq('fail');
+            response.body.should.have.property('message').eq("That auction does not exist or has ended")
+            done()
+          })
+      }, 1000 * 61)
+    }).timeout(1000 * 100);
+  });
 
-  //     it("Should NOT leave feedback because the user is not the actual buyer", (done) => {
-  //       const feedback= {
-  //         "user_id": 1,
-  //         "feedback_poster_id": 2,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "This loser never shipped the item and stole my money",
-  //         "role": "Buyer"
-  //       }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .set({Authorization: `Bearer ${tokenUserTwo}`})
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('You are not allowed to leave feedback on this auction');
-  //         response.should.have.status(400);
-  //         done();
-  //       });
-  //     });
+  describe('GET /api/v1/auctions/bids/1', () => {
+    it('Should get the bid history of the auction', (done) => {
+      chai.request(server)
+        .get('/api/v1/auctions/bids/1')
+        .end((error, response) => {
+          response.should.have.status(200)
+          response.body.should.be.a('object')
+          response.body.data.forEach((object) => {
+            object.should.have.property('price')
+            object.should.have.property('bid_time')
+          })
+          done();
+        })
+    })
+  })
 
-  //     it("Should NOT leave feedback because unauthorized", (done) => {
-  //       const feedback= {
-  //         "user_id": 1,
-  //         "feedback_poster_id": 2,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "This loser never shipped the item and stole my money",
-  //         "role": "Buyer"
-  //       }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Unauthorized');
-  //         done();
-  //       });
-  //     });
+  describe('POST /api/v1/feedback', () => {
+    it("Should properly leave feedback on the auction as the buyer", (done) => {
+      const feedback = {
+        "user_id": 1,
+        "feedback_poster_id": 3,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "This loser never shipped the item and stole my money",
+        "role": "buyer"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(feedback)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Thank you for leaving feedback');
+          response.body.should.have.property('status').eq('success')
+          response.should.have.status(200);
+          done();
+        });
+    });
 
-  //     it("Should properly leave feedback as the seller", (done) => {
-  //       const feedback= {
-  //         "user_id": 3,
-  //         "feedback_poster_id": 1,
-  //         "auction_id": 1,
-  //         "feedback_score": -1,
-  //         "feedback": "What a sucker. Where do you think my castle funds come from?!?",
-  //         "role": "Seller"
-  //       }
-  //       chai.request(server)
-  //       .post('/feedback')
-  //       .set({Authorization: `Bearer ${tokenUserOne}`})
-  //       .send(feedback)
-  //       .end((error, response) => {
-  //         response.text.should.be.eq('Thank you for leaving feedback');
-  //         response.should.have.status(200);
-  //         done();
-  //       });
-  //     });
-  //   });
+    it("Should NOT leave feedback because feedback already left", (done) => {
+      const feedback = {
+        "user_id": 1,
+        "feedback_poster_id": 3,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "This loser never shipped the item and stole my money",
+        "role": "buyer"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .set({ Authorization: `Bearer ${tokenUserThree}` })
+        .send(feedback)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('You have already left feedback for this auction');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400);
+          done();
+        });
+    });
 
-  //   /**
-  //    * Get a user's feedback history
-  //    */
-  //   describe('GET /feedback/:user_id', () => {
-  //     it('Should return the feedback of the requested user', (done) => {
-  //       chai.request(server)
-  //       .get('/feedback/1')
-  //       .end((error, response) => {
-  //         response.should.have.status(200)
-  //         response.body.should.be.a('array')
-  //         response.body.forEach((object) => {
-  //           object.should.have.property('user_id')
-  //           object.should.have.property('poster_id')
-  //           object.should.have.property('auction_id')
-  //           object.should.have.property('feedback_score')
-  //           object.should.have.property('feedback')
-  //         })
-  //         done();
-  //       })
-  //     })
+    it("Should NOT leave feedback because the user is not the actual buyer", (done) => {
+      const feedback = {
+        "user_id": 1,
+        "feedback_poster_id": 2,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "This loser never shipped the item and stole my money",
+        "role": "buyer"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .set({ Authorization: `Bearer ${tokenUserTwo}` })
+        .send(feedback)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('You are not allowed to leave feedback on this auction');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(400);
+          done();
+        });
+    });
 
-  //     it('Should fail to get feedback of a non-existant user', (done) => {
-  //       chai.request(server)
-  //       .get('/feedback/10')
-  //       .end((error, response) => {
-  //         response.should.have.status(404);
-  //         response.text.should.be.eq('Could not find that user');
-  //       done();
-  //       });
-  //     });
-  //   });
+    it("Should NOT leave feedback because unauthorized", (done) => {
+      const feedback = {
+        "user_id": 1,
+        "feedback_poster_id": 2,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "This loser never shipped the item and stole my money",
+        "role": "buyer"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .send(feedback)
+        .end((error, response) => {
+          response.text.should.be.eq('Unauthorized');
+          done();
+        });
+    });
+
+    it("Should properly leave feedback as the seller", (done) => {
+      const feedback = {
+        "user_id": 3,
+        "feedback_poster_id": 1,
+        "auction_id": 1,
+        "feedback_score": -1,
+        "feedback": "What a sucker. Where do you think my castle funds come from?!?",
+        "role": "seller"
+      }
+      chai.request(server)
+        .post('/api/v1/feedback')
+        .set({ Authorization: `Bearer ${tokenUserOne}` })
+        .send(feedback)
+        .end((error, response) => {
+          response.body.should.be.a('object');
+          response.body.should.have.property('message').eq('Thank you for leaving feedback');
+          response.body.should.have.property('status').eq('success');
+          response.should.have.status(200);
+          done();
+        });
+    });
+  });
+
+  /**
+   * Get a user's feedback history
+   */
+  describe('GET /api/v1/feedback/:user_id', () => {
+    it('Should return the feedback of the requested user', (done) => {
+      chai.request(server)
+        .get('/api/v1/feedback/1')
+        .end((error, response) => {
+          response.body.should.be.a('object')
+          response.body.should.have.property('data')
+          response.body.data.forEach((object) => {
+            object.should.have.property('user_id')
+            object.should.have.property('poster_id')
+            object.should.have.property('auction_id')
+            object.should.have.property('feedback_score')
+            object.should.have.property('feedback')
+          })
+          response.should.have.status(200)
+          done();
+        })
+    })
+
+    it('Should fail to get feedback of a non-existant user', (done) => {
+      chai.request(server)
+        .get('/api/v1/feedback/10')
+        .end((error, response) => {
+          response.body.should.be.a('object')
+          response.body.should.have.property('message').eq('Could not find that user or they have no feedback');
+          response.body.should.have.property('status').eq('fail');
+          response.should.have.status(404);
+          done();
+        });
+    });
+  });
 
   //   /**
   //    * Test getting a users bid history using the user_id.

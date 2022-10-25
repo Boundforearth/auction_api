@@ -14,10 +14,8 @@ const auth = require('../auth');
 const getUserById = async (req, res) => {
   try {
     const user_id = req.params.user_id;
-    console.log(user_id)
     const results = await db.pool.query('SELECT user_id, username, feedback_score FROM Users WHERE user_id=$1', [user_id])
     if (!results.rows[0]) {
-      console.log(results.rows[0])
       return res.status(404).json({ status: 'fail', message: 'User not found.' })
     }
     return res.status(200).json({ status: 'success', data: { user: results.rows[0] } })
@@ -51,7 +49,6 @@ const createUser = async (req, res) => {
     if (results.rows[0]) {
       return res.status(400).json({ status: 'fail', message: 'That username or email already exists' })
     }
-    console.log(results.rows[0])
     await db.pool.query('INSERT INTO Users (username, email, password, feedback_score) VALUES ($1, $2, $3, $4) RETURNING user_id',
       [username, email, hash, 0])
     return res.status(200).send({ status: 'success', message: `Created username ${username}` });
